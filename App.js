@@ -1,35 +1,79 @@
-import { Text, SafeAreaView, StyleSheet } from 'react-native';
 
-// You can import supported modules from npm
-import { Card } from 'react-native-paper';
+import { useEffect, useState } from 'react';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Button,
+    TextInput
+} from 'react-native';
 
-// or any files within the Snack
-import AssetExample from './components/AssetExample';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.paragraph}>
-        Change code in the editor and watch it change on your phone! Save to get a shareable url.
-      </Text>
-      <Card>
-        <AssetExample />
-      </Card>
-    </SafeAreaView>
-  );
+
+    const [nome, setNome] = useState('');
+    const [nomeArmazenado, setNomeArmazenado] = useState('');
+
+    const salvarNome = async () => {
+        try {
+            await AsyncStorage.setItem('@nome_usuario', nome);
+            alert('Nome salvo!');
+            carregarDados();
+        }
+        catch (error) {
+            console.log(error);
+        }
+    };
+
+    const carregarDados = async () => {
+        try {
+            const valor = await AsyncStorage.getItem('@nome_usuario');
+
+            if (valor != null) {
+                setNomeArmazenado(valor);
+            }
+        }
+        catch (error) {
+            console.log(error);    
+        }
+    };
+
+    useEffect (() => {
+        carregarDados();
+    }, []);
+
+    return (
+        <View style={styles.container}>
+            <Text>Nome armazenado: {nomeArmazenado}</Text>
+
+            <TextInput
+                placeholder='Digite seu nome'
+                value={nome}
+                onChangeText={setNome}
+                style={styles.input}
+            ></TextInput>
+
+            <Button
+                title='Salvar nome'
+                onPress={ salvarNome }
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    padding: 8,
-  },
-  paragraph: {
-    margin: 24,
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
+    container: {
+        flex:            1,
+        justifyContent:  'center',
+        backgroundColor: '#ecf0f1',
+        padding:         8,
+    },
+    input: {
+        padding:        10,
+        height:         40,
+        borderColor:    'gray',
+        borderWidth:    1,
+        marginVertical: 10,
+    },
 });
